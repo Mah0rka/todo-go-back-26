@@ -27,6 +27,7 @@ type TaskRepository interface {
 	FindAllTasks(uId uint64) ([]domain.Task, error)
 	Update(t domain.Task) (domain.Task, error)
 	Delete(id uint64) error
+	UpdateStatus(id uint64, status domain.TaskStatus) (domain.Task, error) // Оновлюємо статус завдання
 }
 
 type taskRepository struct {
@@ -129,4 +130,18 @@ func (r taskRepository) mapModelToDomainCollection(ts []task) []domain.Task {
 		tasks[i] = r.mapModelToDomain(t)
 	}
 	return tasks
+}
+
+func (r taskRepository) UpdateStatus(id uint64, status domain.TaskStatus) (domain.Task, error) {
+	// Оновлюємо тільки статус і дату оновлення
+	err := r.coll.Find(db.Cond{"id": id, "deleted_date": nil}).Update(map[string]interface{}{
+		"status":       status,
+		"updated_date": time.Now(),
+	})
+	if err != nil {
+		return domain.Task{}, err
+	}
+
+	// Повертаємо оновлений запис
+	return r.Find(id)
 }

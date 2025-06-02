@@ -127,6 +127,11 @@ func TaskRouter(r chi.Router, tc controllers.TaskController, ts app.TaskService)
 			"/{taskId}",
 			tc.Delete(),
 		)
+		apiRouter.With(tpom).Patch(
+			"/{taskId}/status",
+			tc.UpdateStatus(),
+		)
+
 	})
 }
 
